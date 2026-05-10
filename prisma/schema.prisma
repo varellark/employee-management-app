@@ -1,0 +1,360 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ENUM
+
+enum Role {
+  SUPERADMIN
+  MANAGER_HRD
+  ADMIN_HRD
+}
+
+enum StatusKawin {
+  KAWIN
+  TIDAK_KAWIN
+}
+
+enum JenisPegawai {
+  TETAP
+  KONTRAK
+  MAGANG
+}
+
+enum Jabatan {
+  MANAGER
+  STAF
+  MAGANG
+  KARYAWAN
+}
+
+enum Departemen {
+  MARKETING
+  HRD
+  PRODUCTION
+  EXECUTIVE
+  COMMISSIONER
+}
+
+enum GenderPegawai {
+  PRIA
+  WANITA
+}
+
+enum StatusKehadiran {
+  HADIR
+  CUTI
+  IZIN
+  UNPAID_LEAVE
+  ALPHA
+}
+
+enum StatusVerifikasi {
+  PENDING
+  DISETUJUI
+  DITOLAK
+}
+
+enum Verifikator {
+  LEAD
+  MANAGER
+  HRD
+}
+
+enum LokasiGedung {
+  GEDUNG_UTAMA
+  GEDUNG_A
+  GEDUNG_B
+}
+
+enum AksiLog {
+  LOGIN
+  LOGOUT
+  CREATE
+  READ
+  UPDATE
+  DELETE
+}
+
+enum StatusAktif {
+  ACTIVE
+  NON_ACTIVE
+}
+
+// MODEL: Wilayah (Provinsi, Kabupaten, Kecamatan, Kalurahan)
+
+model Provinsi {
+  id         Int      @id @default(autoincrement()) @map("provinsi_id")
+  kode       String   @unique @map("provinsi_kode")
+  nama       String   @map("provinsi_nama")
+  createDate DateTime @default(now()) @map("provinsi_create_date")
+  updateDate DateTime @updatedAt @map("provinsi_update_date")
+
+  kabupaten          Kabupaten[]
+  pegawaiDomisili    Pegawai[]   @relation("domisiliProvinsi")
+  pegawaiTempatLahir Pegawai[]   @relation("tempatLahirProvinsi")
+
+  @@index([kode])
+  @@map("provinsi")
+}
+
+model Kabupaten {
+  id         Int      @id @default(autoincrement()) @map("kabupaten_id")
+  kode       String   @unique @map("kabupaten_kode")
+  nama       String   @map("kabupaten_nama")
+  provinsiId Int      @map("provinsi_id")
+  createDate DateTime @default(now()) @map("kabupaten_create_date")
+  updateDate DateTime @updatedAt @map("kabupaten_update_date")
+
+  provinsi           Provinsi    @relation(fields: [provinsiId], references: [id])
+  pegawaiDomisili    Pegawai[]   @relation("domisiliKabupaten")
+  pegawaiTempatLahir Pegawai[]   @relation("tempatLahirKabupaten")
+  kecamatan          Kecamatan[]
+
+  @@index([provinsiId])
+  @@index([kode])
+  @@map("kabupaten")
+}
+
+model Kecamatan {
+  id          Int      @id @default(autoincrement()) @map("kecamatan_id")
+  kode        String   @unique @map("kecamatan_kode")
+  nama        String   @map("kecamatan_nama")
+  kabupatenId Int      @map("kabupaten_id")
+  createDate  DateTime @default(now()) @map("kecamatan_create_date")
+  updateDate  DateTime @updatedAt @map("kecamatan_update_date")
+
+  kabupaten Kabupaten   @relation(fields: [kabupatenId], references: [id])
+  pegawai   Pegawai[]   @relation("domisiliKecamatan")
+  kalurahan Kalurahan[]
+
+  @@index([kabupatenId])
+  @@index([kode])
+  @@map("kecamatan")
+}
+
+model Kalurahan {
+  id          Int      @id @default(autoincrement()) @map("kalurahan_id")
+  kode        String   @unique @map("kalurahan_kode")
+  nama        String   @map("kalurahan_nama")
+  kecamatanId Int      @map("kecamatan_id")
+  createDate  DateTime @default(now()) @map("kalurahan_create_date")
+  updateDate  DateTime @updatedAt @map("kalurahan_update_date")
+
+  kecamatan Kecamatan @relation(fields: [kecamatanId], references: [id])
+  pegawai   Pegawai[] @relation("domisiliKalurahan")
+
+  @@index([kecamatanId])
+  @@index([kode])
+  @@map("kalurahan")
+}
+
+// MODEL: Pegawai
+
+model Pegawai {
+  id                     Int           @id @default(autoincrement()) @map("pegawai_id")
+  nip                    String        @unique @map("pegawai_nip")
+  nama                   String        @map("pegawai_nama")
+  email                  String        @unique @map("pegawai_email")
+  nomorHp                String        @map("pegawai_nomor_hp")
+  foto                   String?       @map("pegawai_foto")
+  provinsiId             Int?          @map("provinsi_id")
+  kabupatenId            Int?          @map("kabupaten_id")
+  kecamatanId            Int?          @map("kecamatan_id")
+  kalurahanId            Int?          @map("kalurahan_id")
+  alamatDetail           String?       @map("pegawai_alamat_detail")
+  latitude               Decimal?      @map("pegawai_latitude") @db.Decimal(10, 8)
+  longitude              Decimal?      @map("pegawai_longitude") @db.Decimal(11, 8)
+  tempatLahirProvinsiId  Int?          @map("tempat_lahir_provinsi_id")
+  tempatLahirKabupatenId Int?          @map("tempat_lahir_kabupaten_id")
+  tanggalLahir           DateTime      @map("pegawai_tanggal_lahir") @db.Date
+  gender                 GenderPegawai @map("pegawai_gender")
+  statusKawin            StatusKawin   @map("pegawai_status_kawin")
+  jumlahAnak             Int           @default(0) @map("pegawai_jumlah_anak")
+  tanggalMasuk           DateTime      @map("pegawai_tanggal_masuk") @db.Date
+  jabatan                Jabatan       @map("pegawai_jabatan")
+  departemen             Departemen    @map("pegawai_departemen")
+  jenisPegawai           JenisPegawai  @map("pegawai_jenis_pegawai")
+  statusAktif            StatusAktif   @default(ACTIVE) @map("pegawai_status")
+  pendidikan             Json?         @map("pegawai_pendidikan")
+  createDate             DateTime      @default(now()) @map("pegawai_create_date")
+  updateDate             DateTime      @updatedAt @map("pegawai_update_date")
+
+  provinsi  Provinsi?  @relation("domisiliProvinsi", fields: [provinsiId], references: [id])
+  kabupaten Kabupaten? @relation("domisiliKabupaten", fields: [kabupatenId], references: [id])
+  kecamatan Kecamatan? @relation("domisiliKecamatan", fields: [kecamatanId], references: [id])
+  kalurahan Kalurahan? @relation("domisiliKalurahan", fields: [kalurahanId], references: [id])
+
+  tempatLahirProvinsi  Provinsi?  @relation("tempatLahirProvinsi", fields: [tempatLahirProvinsiId], references: [id])
+  tempatLahirKabupaten Kabupaten? @relation("tempatLahirKabupaten", fields: [tempatLahirKabupatenId], references: [id])
+
+  user      User?
+  presensi  Presensi[]
+  tunjangan Tunjangan[]
+
+  @@index([provinsiId])
+  @@index([kabupatenId])
+  @@index([kecamatanId])
+  @@index([kalurahanId])
+  @@index([statusAktif])
+  @@index([departemen])
+  @@index([jabatan])
+  @@index([tanggalMasuk])
+  @@map("pegawai")
+}
+
+// MODEL: User (Auth)
+
+model User {
+  id            Int         @id @default(autoincrement()) @map("user_id")
+  pegawaiId     Int         @unique @map("pegawai_id")
+  username      String      @unique @map("user_username")
+  password      String      @map("user_password")
+  role          Role        @map("user_role")
+  statusAktif   StatusAktif @default(ACTIVE) @map("user_status")
+  rememberToken String?     @map("user_remember_token")
+  lastLoginAt   DateTime?   @map("user_last_login_at")
+  createDate    DateTime    @default(now()) @map("user_create_date")
+  updateDate    DateTime    @updatedAt @map("user_update_date")
+
+  pegawai  Pegawai   @relation(fields: [pegawaiId], references: [id])
+  otpCodes OtpCode[]
+  log      Log[]
+
+  @@index([pegawaiId])
+  @@index([statusAktif])
+  @@map("users")
+}
+
+// MODEL: OTP
+
+model OtpCode {
+  id         Int      @id @default(autoincrement()) @map("otp_id")
+  userId     Int      @map("user_id")
+  kode       String   @map("otp_kode")
+  expiresAt  DateTime @map("otp_expires_at")
+  used       Boolean  @default(false) @map("otp_used")
+  createDate DateTime @default(now()) @map("otp_create_date")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("otp_codes")
+}
+
+// MODEL: Setting Tunjangan Transport
+
+model SettingTunjanganTransport {
+  id          Int         @id @default(autoincrement()) @map("setting_id")
+  baseFare    Decimal     @map("setting_base_fare") @db.Decimal(12, 2)
+  keterangan  String?     @map("setting_keterangan")
+  statusAktif StatusAktif @default(ACTIVE) @map("setting_status")
+  createDate  DateTime    @default(now()) @map("setting_create_date")
+  updateDate  DateTime    @updatedAt @map("setting_update_date")
+
+  @@index([statusAktif])
+  @@map("setting_tunjangan_transport")
+}
+
+// MODEL: Tunjangan
+
+model Tunjangan {
+  id              Int      @id @default(autoincrement()) @map("tunjangan_id")
+  pegawaiId       Int      @map("pegawai_id")
+  periode         String   @map("tunjangan_periode")
+  jarakKm         Decimal  @map("tunjangan_jarak_km") @db.Decimal(6, 2)
+  jumlahHariMasuk Int      @map("tunjangan_jumlah_hari_masuk")
+  baseFare        Decimal  @map("tunjangan_base_fare") @db.Decimal(12, 2)
+  totalTunjangan  Decimal  @map("tunjangan_total") @db.Decimal(14, 2)
+  keterangan      String?  @map("tunjangan_keterangan")
+  createDate      DateTime @default(now()) @map("tunjangan_create_date")
+  updateDate      DateTime @updatedAt @map("tunjangan_update_date")
+
+  pegawai Pegawai @relation(fields: [pegawaiId], references: [id])
+
+  @@unique([pegawaiId, periode])
+  @@index([pegawaiId])
+  @@index([periode])
+  @@map("tunjangan")
+}
+
+// MODEL: Presensi
+
+model Presensi {
+  id               Int              @id @default(autoincrement()) @map("presensi_id")
+  pegawaiId        Int              @map("pegawai_id")
+  tanggal          DateTime         @map("presensi_tanggal") @db.Date
+  lokasiCheckin    LokasiGedung?    @map("presensi_checkin")
+  lokasiCheckout   LokasiGedung?    @map("presensi_checkout")
+  waktuCheckin     DateTime?        @map("presensi_waktu_checkin")
+  waktuCheckout    DateTime?        @map("presensi_waktu_checkout")
+  durasi           Int?             @map("presensi_durasi")
+  statusKehadiran  StatusKehadiran  @map("presensi_status")
+  statusTerpenuhi  Boolean          @default(false) @map("presensi_terpenuhi")
+  isHalfday        Boolean          @default(false) @map("presensi_halfday")
+  statusVerifikasi StatusVerifikasi @default(PENDING) @map("presensi_verifikasi")
+  verifikator      Verifikator?     @map("presensi_verifikator")
+  verifikatorId    Int?             @map("presensi_verifikator_id")
+  keterangan       String?          @map("presensi_keterangan")
+  createDate       DateTime         @default(now()) @map("presensi_create_date")
+  updateDate       DateTime         @updatedAt @map("presensi_update_date")
+
+  pegawai Pegawai @relation(fields: [pegawaiId], references: [id])
+
+  @@unique([pegawaiId, tanggal])
+  @@index([pegawaiId])
+  @@index([tanggal])
+  @@index([statusKehadiran])
+  @@index([statusVerifikasi])
+  @@map("presensi")
+}
+
+// MODEL: Kuota Cuti & Izin
+
+model KuotaAbsensi {
+  id          Int @id @default(autoincrement()) @map("kuota_absensi_id")
+  pegawaiId   Int @map("pegawai_id")
+  tahun       Int @map("kuota_tahun")
+  kuotaCuti   Int @default(12) @map("kuota_cuti")
+  sisaCuti    Int @default(12) @map("sisa_cuti")
+  kuotaIzin   Int @default(6) @map("kuota_izin")
+  sisaIzin    Int @default(6) @map("sisa_izin")
+  kuotaUnpaid Int @default(3) @map("kuota_unpaid")
+  sisaUnpaid  Int @default(3) @map("sisa_unpaid")
+
+  createDate DateTime @default(now()) @map("kuota_create_date")
+  updateDate DateTime @updatedAt @map("kuota_update_date")
+
+  @@unique([pegawaiId, tahun])
+  @@index([pegawaiId])
+  @@index([tahun])
+  @@map("kuota_absensi")
+}
+
+// MODEL: Log Aktivitas
+
+model Log {
+  id         Int      @id @default(autoincrement()) @map("log_id")
+  userId     Int      @map("user_id")
+  username   String   @map("log_username")
+  aksi       AksiLog  @map("log_aksi")
+  modul      String   @map("log_modul")
+  keterangan String?  @map("log_keterangan")
+  ipAddress  String?  @map("log_ip")
+  userAgent  String?  @map("log_user_agent")
+  createDate DateTime @default(now()) @map("log_create_date")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([aksi])
+  @@index([modul])
+  @@index([createDate])
+  @@map("log")
+}
