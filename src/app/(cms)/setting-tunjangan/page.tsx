@@ -184,6 +184,7 @@ export default function SettingTunjanganPage() {
               id: item.id,
             })
           }
+          disabled={item.statusAktif === 'ACTIVE'}
           className='btn btn-sm btn-outline-danger d-flex align-items-center justify-content-center'
           title='Hapus'
           style={{ width: 30, height: 30, padding: 0 }}
