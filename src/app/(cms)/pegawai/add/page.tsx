@@ -184,21 +184,9 @@ export default function AddPegawaiPage() {
   };
 
   useEffect(() => {
-    if (!tanggalLahir) {
-      setUsia('');
-      return;
-    }
-    const parts = tanggalLahir.split('/');
-    if (parts.length !== 3) {
-      setUsia('');
-      return;
-    }
-    const [d, m, y] = parts.map(Number);
-    if (!d || !m || !y || y < 1900) {
-      setUsia('');
-      return;
-    }
-    const birth = new Date(y, m - 1, d);
+    if (!tanggalLahir) { setUsia(''); return; }
+    const birth = new Date(tanggalLahir);
+    if (isNaN(birth.getTime())) { setUsia(''); return; }
     const now = new Date();
     let age = now.getFullYear() - birth.getFullYear();
     const mDiff = now.getMonth() - birth.getMonth();
@@ -582,27 +570,15 @@ export default function AddPegawaiPage() {
                 Tanggal Lahir
               </label>
               <input
-                type='text'
+                type='date'
                 className={inputCls(errors.tanggalLahir)}
-                placeholder='DD/MM/YYYY'
-                maxLength={10}
+                max={new Date().toISOString().split('T')[0]}
                 {...register('tanggalLahir', {
                   required: 'Tanggal lahir wajib diisi',
-                  pattern: {
-                    value: /^\d{2}\/\d{2}\/\d{4}$/,
-                    message: 'Format harus DD/MM/YYYY',
-                  },
                   validate: (v) => {
-                    const [d, m, y] = v.split('/').map(Number);
-                    const date = new Date(y, m - 1, d);
-                    if (
-                      date.getFullYear() !== y ||
-                      date.getMonth() !== m - 1 ||
-                      date.getDate() !== d
-                    )
-                      return 'Tanggal tidak valid';
-                    if (date >= new Date())
-                      return 'Tanggal lahir harus di masa lalu';
+                    const date = new Date(v);
+                    if (isNaN(date.getTime())) return 'Tanggal tidak valid';
+                    if (date >= new Date()) return 'Tanggal lahir harus di masa lalu';
                     return true;
                   },
                 })}
@@ -764,25 +740,13 @@ export default function AddPegawaiPage() {
                 Tanggal Masuk
               </label>
               <input
-                type='text'
+                type='date'
                 className={inputCls(errors.tanggalMasuk)}
-                placeholder='DD/MM/YYYY'
-                maxLength={10}
                 {...register('tanggalMasuk', {
                   required: 'Tanggal masuk wajib diisi',
-                  pattern: {
-                    value: /^\d{2}\/\d{2}\/\d{4}$/,
-                    message: 'Format harus DD/MM/YYYY',
-                  },
                   validate: (v) => {
-                    const [d, m, y] = v.split('/').map(Number);
-                    const date = new Date(y, m - 1, d);
-                    if (
-                      date.getFullYear() !== y ||
-                      date.getMonth() !== m - 1 ||
-                      date.getDate() !== d
-                    )
-                      return 'Tanggal tidak valid';
+                    const date = new Date(v);
+                    if (isNaN(date.getTime())) return 'Tanggal tidak valid';
                     return true;
                   },
                 })}
