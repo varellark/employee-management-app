@@ -91,6 +91,7 @@ export default function PresensiPage() {
   const defaultPeriode = getDefaultPeriode();
   const [month, setMonth] = useState(defaultPeriode.month);
   const [year, setYear] = useState(defaultPeriode.year);
+  const [loadingDownload, setLoadingDownload] = useState(false);
 
   const fetchData = async (
     q = '',
@@ -156,9 +157,35 @@ export default function PresensiPage() {
 
   const handleDownloadTemplate = async () => {
     try {
-      toast.info('Fitur download template Excel masih dalam pengembangan.');
+      setLoadingDownload(true);
+      toast.info('Menyiapkan template...');
+      const token = useAuthStore.getState().token;
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_FETCH_URL}/presensi/template?month=${month}&year=${year}`,
+        { method: 'GET', headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (!response.ok) {
+        toast.error('Gagal download template');
+        return;
+      }
+
+      const blob = await response.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = `template-presensi-${year}${month.padStart(2, '0')}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+
+      toast.success('Template berhasil diunduh!');
     } catch {
       toast.error('Gagal download template');
+    } finally {
+      setLoadingDownload(false);
     }
   };
 
@@ -344,8 +371,21 @@ export default function PresensiPage() {
                   transition: 'all 0.2s ease',
                 }}
               >
-                <FiDownload size={15} />
-                Template Excel
+                {loadingDownload ? (
+                  <>
+                  <span
+                    className='spinner-border spinner-border-sm'
+                    role='status'
+                    aria-hidden='true'
+                  />
+                    Memproses...
+                  </>
+                ) : (
+                  <>
+                    <FiDownload size={15} />
+                    Template Excel
+                  </>
+                )}
               </button>
               <input
                 ref={fileInputRef}

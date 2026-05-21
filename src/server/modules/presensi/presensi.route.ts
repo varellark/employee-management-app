@@ -12,5 +12,7 @@ presensiRoute.get('/:pegawaiId/detail', PresensiController.detail);
 presensiRoute.post('/', PresensiController.create);
 presensiRoute.put('/:id', PresensiController.update);
 presensiRoute.delete('/:id', PresensiController.delete);
+presensiRoute.get('/template', PresensiController.downloadTemplate);
+presensiRoute.post('/import',  PresensiController.importExcel);
 
 export default presensiRoute;

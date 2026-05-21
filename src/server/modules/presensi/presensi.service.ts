@@ -1,11 +1,15 @@
-import { Prisma } from '@prisma/client';
+import {
+  LokasiGedung,
+  Prisma,
+  StatusKehadiran,
+  StatusVerifikasi,
+  Verifikator,
+} from '@prisma/client';
 import { prisma } from '@/server/lib/prisma';
 import { Pagination } from '@/server/helpers';
 import { determineStatus } from '@/server/helpers/presensi';
-import type {
-  CreatePayload,
-  GetAllPayload,
-} from './presensi.type';
+import type { CreatePayload, GetAllPayload } from './presensi.type';
+import { PresensiImportRow } from '@/server/modules/presensi/presensi.excel';
 
 export class PresensiService {
   static async getAll(query: GetAllPayload) {
@@ -99,10 +103,14 @@ export class PresensiService {
           },
         });
 
-        const hadir = item.presensi.filter((x) => x.statusKehadiran === 'HADIR');
+        const hadir = item.presensi.filter(
+          (x) => x.statusKehadiran === 'HADIR'
+        );
         const cuti = item.presensi.filter((x) => x.statusKehadiran === 'CUTI');
         const izin = item.presensi.filter((x) => x.statusKehadiran === 'IZIN');
-        const unpaid = item.presensi.filter((x) => x.statusKehadiran === 'UNPAID_LEAVE');
+        const unpaid = item.presensi.filter(
+          (x) => x.statusKehadiran === 'UNPAID_LEAVE'
+        );
 
         return {
           id: item.id,
@@ -207,5 +215,88 @@ export class PresensiService {
         id,
       },
     });
+  }
+
+  static async importBulk(
+    rows: PresensiImportRow[]
+  ): Promise<{ created: number; skipped: number }> {
+    let created = 0;
+    let skipped = 0;
+
+    for (const row of rows) {
+      const pegawai = await prisma.pegawai.findUnique({
+        where: { nip: row.nip },
+      });
+      if (!pegawai) {
+        skipped++;
+        continue;
+      }
+
+      const tanggal = new Date(row.tanggal);
+
+      const buildTime = (base: Date, hhmm?: string): Date | undefined => {
+        if (!hhmm) return undefined;
+        const [hh, mm] = hhmm.split(':').map(Number);
+        const d = new Date(base);
+        d.setHours(hh, mm, 0, 0);
+        return d;
+      };
+
+      const waktuCheckin = buildTime(tanggal, row.waktuCheckin);
+      const waktuCheckout = buildTime(tanggal, row.waktuCheckout);
+
+      let durasi: number | undefined;
+      let statusTerpenuhi = false;
+      let isHalfday = false;
+
+      if (waktuCheckin && waktuCheckout) {
+        durasi = Math.floor(
+          (waktuCheckout.getTime() - waktuCheckin.getTime()) / 60000
+        );
+        statusTerpenuhi = durasi >= 480;
+        isHalfday = durasi >= 240 && durasi < 480;
+      }
+
+      try {
+        await prisma.presensi.upsert({
+          where: { pegawaiId_tanggal: { pegawaiId: pegawai.id, tanggal } },
+          update: {
+            lokasiCheckin: (row.lokasiCheckin as LokasiGedung) ?? null,
+            lokasiCheckout: (row.lokasiCheckout as LokasiGedung) ?? null,
+            waktuCheckin: waktuCheckin ?? null,
+            waktuCheckout: waktuCheckout ?? null,
+            durasi: durasi ?? null,
+            statusKehadiran: row.statusKehadiran as StatusKehadiran,
+            statusTerpenuhi,
+            isHalfday,
+            statusVerifikasi:
+              (row.statusVerifikasi as StatusVerifikasi) ?? 'PENDING',
+            verifikator: (row.verifikator as Verifikator) ?? null,
+            keterangan: row.keterangan ?? null,
+          },
+          create: {
+            pegawaiId: pegawai.id,
+            tanggal,
+            lokasiCheckin: (row.lokasiCheckin as LokasiGedung) ?? null,
+            lokasiCheckout: (row.lokasiCheckout as LokasiGedung) ?? null,
+            waktuCheckin: waktuCheckin ?? null,
+            waktuCheckout: waktuCheckout ?? null,
+            durasi: durasi ?? null,
+            statusKehadiran: row.statusKehadiran as StatusKehadiran,
+            statusTerpenuhi,
+            isHalfday,
+            statusVerifikasi:
+              (row.statusVerifikasi as StatusVerifikasi) ?? 'PENDING',
+            verifikator: (row.verifikator as Verifikator) ?? null,
+            keterangan: row.keterangan ?? null,
+          },
+        });
+        created++;
+      } catch {
+        skipped++;
+      }
+    }
+
+    return { created, skipped };
   }
 }

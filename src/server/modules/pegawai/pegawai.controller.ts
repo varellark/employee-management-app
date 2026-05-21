@@ -415,7 +415,7 @@ export class PegawaiController {
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       console.error('Export PDF error:', error);
-      return ResponseHelper.error(c, message, null, 500); // ← tampilkan message asli
+      return ResponseHelper.error(c, message, null, 500);
     }
   }
 

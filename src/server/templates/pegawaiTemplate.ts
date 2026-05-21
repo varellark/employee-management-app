@@ -193,7 +193,6 @@ export function buildPegawaiDetailHtml(
       background: #fff;
     }
 
-    /* ── Header ── */
     .header {
       display: flex;
       align-items: center;

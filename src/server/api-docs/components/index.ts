@@ -38,7 +38,6 @@ export const components = {
   },
 
   schemas: {
-    // ─── Enums ────────────────────────────────────────────────────────────────
     Role: {
       type: 'string',
       enum: ['SUPERADMIN', 'MANAGER_HRD', 'ADMIN_HRD'],
@@ -89,7 +88,6 @@ export const components = {
       enum: ['UMUM', 'KEUANGAN', 'KEPEGAWAIAN', 'PERENCANAAN', 'TEKNIS'],
     },
 
-    // ─── Common Responses ─────────────────────────────────────────────────────
     SuccessResponse: {
       type: 'object',
       properties: {
@@ -133,7 +131,6 @@ export const components = {
       },
     },
 
-    // ─── User ─────────────────────────────────────────────────────────────────
     User: {
       type: 'object',
       properties: {
@@ -147,7 +144,6 @@ export const components = {
       },
     },
 
-    // ─── Pegawai ──────────────────────────────────────────────────────────────
     Pegawai: {
       type: 'object',
       properties: {
@@ -265,7 +261,6 @@ export const components = {
       allOf: [{ $ref: '#/components/schemas/CreatePegawaiRequest' }],
     },
 
-    // ─── Presensi ─────────────────────────────────────────────────────────────
     Presensi: {
       type: 'object',
       properties: {
@@ -317,7 +312,6 @@ export const components = {
       allOf: [{ $ref: '#/components/schemas/CreatePresensiRequest' }],
     },
 
-    // ─── Tunjangan ────────────────────────────────────────────────────────────
     Tunjangan: {
       type: 'object',
       properties: {
