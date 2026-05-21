@@ -11,6 +11,10 @@ import {
 import { LogService } from '../../services/log.service';
 import type { AuthPayload } from '../../middlewares/auth.middleware';
 import { hitungTunjangan } from './tunjangan.helper';
+import { buildTunjanganListHtml, TunjanganRow } from '@/server/templates/tunjanganListTemplate';
+import { generatePdfFromHtml } from '@/server/helpers/pdfGenerator';
+import { TunjanganWithPegawai } from '@/server/modules/tunjangan/tunjangan.type';
+import { buildTunjanganDetailHtml, TunjanganDetailRow } from '@/server/templates/tunjanganTemplate';
 
 export class TunjanganController {
   static async index(c: Context) {
@@ -257,24 +261,46 @@ export class TunjanganController {
         noPagination: 'true',
       });
 
+      const html = buildTunjanganListHtml(
+        (result.data as TunjanganWithPegawai[]).map((t) => ({
+          ...t,
+          jarakKm: t.jarakKm.toString(),
+          baseFare: t.baseFare.toString(),
+          totalTunjangan: t.totalTunjangan.toString(),
+          keterangan: t.keterangan ?? undefined,
+          pegawai: {
+            ...t.pegawai,
+            departemen: t.pegawai.departemen ?? undefined,
+          },
+        })) satisfies TunjanganRow[]
+      );
+      const pdfBuffer = await generatePdfFromHtml(html);
+
+      const timestamp = new Date()
+        .toISOString()
+        .slice(0, 10)
+        .replace(/-/g, '');
+      const filename = `laporan-tunjangan-${timestamp}.pdf`;
+
       await LogService.create({
         userId: auth.id,
         username: auth.username,
         aksi: AksiLog.READ,
         modul: 'TUNJANGAN',
-        keterangan: 'Export data tunjangan',
+        keterangan: 'Export PDF laporan tunjangan',
         ipAddress: c.req.header('x-forwarded-for') || '',
         userAgent: c.req.header('user-agent') || '',
       });
 
-      return ResponseHelper.success(
-        c,
-        'Data export tunjangan berhasil diambil',
-        result.data
-      );
+      c.header('Content-Type', 'application/pdf');
+      c.header('Content-Disposition', `attachment; filename="${filename}"`);
+      c.header('Content-Length', String(pdfBuffer.length));
+
+      return c.body(pdfBuffer.buffer as ArrayBuffer);
     } catch (error) {
-      console.error(error);
-      return ResponseHelper.error(c, 'Internal server error', error);
+      const message = error instanceof Error ? error.message : String(error);
+      console.error('Export PDF tunjangan error:', error);
+      return ResponseHelper.error(c, message, null, 500);
     }
   }
 
@@ -282,31 +308,58 @@ export class TunjanganController {
     try {
       const auth = c.get('user') as AuthPayload;
       const id = Number(c.req.param('id'));
-      if (isNaN(id))
+
+      if (isNaN(id)) {
         return ResponseHelper.error(c, 'ID tidak valid', null, 400);
+      }
 
       const tunjangan = await TunjanganService.findById(id);
-      if (!tunjangan)
+
+      if (!tunjangan) {
         return ResponseHelper.error(c, 'Tunjangan tidak ditemukan', null, 404);
+      }
+
+      const row: TunjanganDetailRow = {
+        ...tunjangan,
+        jarakKm: tunjangan.jarakKm.toString(),
+        baseFare: tunjangan.baseFare.toString(),
+        totalTunjangan: tunjangan.totalTunjangan.toString(),
+        keterangan: tunjangan.keterangan ?? undefined,
+        pegawai: {
+          ...tunjangan.pegawai,
+          departemen: tunjangan.pegawai.departemen ?? undefined,
+        },
+      };
+
+      const html = buildTunjanganDetailHtml(row);
+      const pdfBuffer = await generatePdfFromHtml(html);
+
+      const timestamp = new Date()
+        .toISOString()
+        .slice(0, 10)
+        .replace(/-/g, '');
+      const safeName = tunjangan.pegawai.nama.replace(/\s+/g, '-').toLowerCase();
+      const filename = `tunjangan-${safeName}-${tunjangan.periode}-${timestamp}.pdf`;
 
       await LogService.create({
         userId: auth.id,
         username: auth.username,
         aksi: AksiLog.READ,
         modul: 'TUNJANGAN',
-        keterangan: `Export data tunjangan ID ${id}`,
+        keterangan: `Export PDF tunjangan ${tunjangan.pegawai.nama} periode ${tunjangan.periode}`,
         ipAddress: c.req.header('x-forwarded-for') || '',
         userAgent: c.req.header('user-agent') || '',
       });
 
-      return ResponseHelper.success(
-        c,
-        'Data export tunjangan berhasil diambil',
-        tunjangan
-      );
+      c.header('Content-Type', 'application/pdf');
+      c.header('Content-Disposition', `attachment; filename="${filename}"`);
+      c.header('Content-Length', String(pdfBuffer.length));
+
+      return c.body(pdfBuffer.buffer as ArrayBuffer);
     } catch (error) {
-      console.error(error);
-      return ResponseHelper.error(c, 'Internal server error', error);
+      const message = error instanceof Error ? error.message : String(error);
+      console.error('Export PDF tunjangan error:', error);
+      return ResponseHelper.error(c, message, null, 500);
     }
   }
 }

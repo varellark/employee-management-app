@@ -143,6 +143,7 @@ export default function DetailPegawaiPage() {
   const id = params?.id as string;
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<DetailPegawai | null>(null);
+  const [loadingExport, setLoadingExport] = useState(false);
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -168,7 +169,7 @@ export default function DetailPegawaiPage() {
 
   const handleExport = async (id: number) => {
     try {
-      setLoading(true);
+      setLoadingExport(true);
       toast.info('Sedang menyiapkan PDF...');
       const token = useAuthStore.getState().token;
 
@@ -206,7 +207,7 @@ export default function DetailPegawaiPage() {
     } catch {
       toast.error('Gagal export data');
     } finally {
-      setLoading(false);
+      setLoadingExport(false);
     }
   };
 
@@ -264,8 +265,21 @@ export default function DetailPegawaiPage() {
               transition: 'all 0.2s ease',
             }}
           >
-            <FiDownload size={15} />
-            Export PDF
+            {loadingExport ? (
+              <>
+                <span
+                  className='spinner-border spinner-border-sm'
+                  role='status'
+                  aria-hidden='true'
+                />
+                Memproses...
+              </>
+            ) : (
+              <>
+                <FiDownload size={15} />
+                Export PDF
+              </>
+            )}
           </button>
         </div>
       </div>

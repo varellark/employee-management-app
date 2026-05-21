@@ -8,6 +8,7 @@ import Card from '@/components/ui/card';
 import Request from '@/utils/request';
 import { dateFormat } from '@/utils/date';
 import { formatRupiah } from '@/utils/format';
+import useAuthStore from '@/store/authStore';
 
 type DetailTunjangan = {
   id: number;
@@ -33,6 +34,7 @@ export default function DetailTunjanganPage() {
   const id = params?.id as string;
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<DetailTunjangan | null>(null);
+  const [loadingExport, setLoadingExport] = useState(false);
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -58,11 +60,47 @@ export default function DetailTunjanganPage() {
     }
   }, [id, router]);
 
-  const handleExport = async () => {
+  const handleExport = async (id: number) => {
     try {
-      toast.info('Fitur export PDF dalam pengembangan.');
+      setLoadingExport(true);
+      toast.info('Sedang menyiapkan PDF...');
+      const token = useAuthStore.getState().token;
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_FETCH_URL}/tunjangan/${id}/export`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        toast.error(err?.message || 'Gagal export PDF');
+        return;
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+
+      const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      const filename = `pegawai-${id}-${timestamp}.pdf`;
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+
+      toast.success('PDF berhasil diunduh!');
     } catch {
       toast.error('Gagal export data');
+    } finally {
+      setLoadingExport(false);
     }
   };
 
@@ -95,7 +133,7 @@ export default function DetailTunjanganPage() {
         </div>
         <button
           type='button'
-          onClick={handleExport}
+          onClick={() => handleExport(data.id)}
           className='btn text-white fw-semibold d-inline-flex align-items-center justify-content-center gap-2 px-4 py-2 rounded-4 shadow-sm'
           style={{
             background: 'linear-gradient(135deg, #475569 0%, #64748b 100%)',
@@ -103,8 +141,21 @@ export default function DetailTunjanganPage() {
             transition: 'all 0.2s ease',
           }}
         >
-          <FiDownload size={15} />
-          Export PDF
+          {loadingExport ? (
+            <>
+              <span
+                className='spinner-border spinner-border-sm'
+                role='status'
+                aria-hidden='true'
+              />
+              Memproses...
+            </>
+          ) : (
+            <>
+              <FiDownload size={15} />
+              Export PDF
+            </>
+          )}
         </button>
       </div>
       <div className='row g-4'>

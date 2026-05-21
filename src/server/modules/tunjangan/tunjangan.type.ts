@@ -1,3 +1,5 @@
+import { Prisma } from '@prisma/client';
+
 export type GetAllTunjanganQuery = {
   search?: string;
   periode?: string;
@@ -18,3 +20,17 @@ export type GenerateTunjanganPayload = {
     keterangan?: string;
   }[];
 };
+
+export type TunjanganWithPegawai = Prisma.TunjanganGetPayload<{
+  include: {
+    pegawai: {
+      select: {
+        id: true;
+        nip: true;
+        nama: true;
+        jabatan: true;
+        departemen: true;
+      };
+    };
+  };
+}>;
