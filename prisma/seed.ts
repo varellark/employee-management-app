@@ -26,7 +26,7 @@ function randomElement<T>(arr: T[]): T {
 }
 
 function generateNIP(prefix: string, index: number): string {
-  return `${prefix}${String(index).padStart(8, '0')}`;
+  return `${prefix}${String(index).padStart(6, '0')}`;
 }
 
 function dateFromDaysAgo(days: number): Date {
@@ -137,25 +137,41 @@ async function main() {
   const Magelang = await prisma.kabupaten.upsert({
     where: { kode: '3308' },
     update: {},
-    create: { kode: '3308', nama: 'Kabupaten Magelang', provinsiId: JawaTengah.id },
+    create: {
+      kode: '3308',
+      nama: 'Kabupaten Magelang',
+      provinsiId: JawaTengah.id,
+    },
   });
 
   const Purworejo = await prisma.kabupaten.upsert({
     where: { kode: '3306' },
     update: {},
-    create: { kode: '3306', nama: 'Kabupaten Purworejo', provinsiId: JawaTengah.id },
+    create: {
+      kode: '3306',
+      nama: 'Kabupaten Purworejo',
+      provinsiId: JawaTengah.id,
+    },
   });
 
   const Bandung = await prisma.kabupaten.upsert({
     where: { kode: '3204' },
     update: {},
-    create: { kode: '3204', nama: 'Kabupaten Bandung', provinsiId: JawaBarat.id },
+    create: {
+      kode: '3204',
+      nama: 'Kabupaten Bandung',
+      provinsiId: JawaBarat.id,
+    },
   });
 
   const Malang = await prisma.kabupaten.upsert({
     where: { kode: '3507' },
     update: {},
-    create: { kode: '3507', nama: 'Kabupaten Malang', provinsiId: JawaTimur.id },
+    create: {
+      kode: '3507',
+      nama: 'Kabupaten Malang',
+      provinsiId: JawaTimur.id,
+    },
   });
 
   const Depok = await prisma.kecamatan.upsert({
@@ -203,7 +219,11 @@ async function main() {
   const Gondokusuman = await prisma.kecamatan.upsert({
     where: { kode: '3471020' },
     update: {},
-    create: { kode: '3471020', nama: 'Gondokusuman', kabupatenId: KotaYogya.id },
+    create: {
+      kode: '3471020',
+      nama: 'Gondokusuman',
+      kabupatenId: KotaYogya.id,
+    },
   });
 
   const Umbulharjo = await prisma.kecamatan.upsert({
@@ -245,13 +265,21 @@ async function main() {
   const Minomartani = await prisma.kalurahan.upsert({
     where: { kode: '3404160002' },
     update: {},
-    create: { kode: '3404160002', nama: 'Minomartani', kecamatanId: Ngaglik.id },
+    create: {
+      kode: '3404160002',
+      nama: 'Minomartani',
+      kecamatanId: Ngaglik.id,
+    },
   });
 
   const Sardonoharjo = await prisma.kalurahan.upsert({
     where: { kode: '3404160003' },
     update: {},
-    create: { kode: '3404160003', nama: 'Sardonoharjo', kecamatanId: Ngaglik.id },
+    create: {
+      kode: '3404160003',
+      nama: 'Sardonoharjo',
+      kecamatanId: Ngaglik.id,
+    },
   });
 
   const Sidokarto = await prisma.kalurahan.upsert({
@@ -263,42 +291,92 @@ async function main() {
   const Ambarketawang = await prisma.kalurahan.upsert({
     where: { kode: '3404030001' },
     update: {},
-    create: { kode: '3404030001', nama: 'Ambarketawang', kecamatanId: Gamping.id },
+    create: {
+      kode: '3404030001',
+      nama: 'Ambarketawang',
+      kecamatanId: Gamping.id,
+    },
   });
 
   const Tirtonirmolo = await prisma.kalurahan.upsert({
     where: { kode: '3402010004' },
     update: {},
-    create: { kode: '3402010004', nama: 'Tirtonirmolo', kecamatanId: Kasihan.id },
+    create: {
+      kode: '3402010004',
+      nama: 'Tirtonirmolo',
+      kecamatanId: Kasihan.id,
+    },
   });
 
   const Panggungharjo = await prisma.kalurahan.upsert({
     where: { kode: '3402020001' },
     update: {},
-    create: { kode: '3402020001', nama: 'Panggungharjo', kecamatanId: Sewon.id },
+    create: {
+      kode: '3402020001',
+      nama: 'Panggungharjo',
+      kecamatanId: Sewon.id,
+    },
   });
 
   const Baciro = await prisma.kalurahan.upsert({
     where: { kode: '3471020004' },
     update: {},
-    create: { kode: '3471020004', nama: 'Baciro', kecamatanId: Gondokusuman.id },
+    create: {
+      kode: '3471020004',
+      nama: 'Baciro',
+      kecamatanId: Gondokusuman.id,
+    },
   });
 
   const Sorosutan = await prisma.kalurahan.upsert({
     where: { kode: '3471070006' },
     update: {},
-    create: { kode: '3471070006', nama: 'Sorosutan', kecamatanId: Umbulharjo.id },
+    create: {
+      kode: '3471070006',
+      nama: 'Sorosutan',
+      kecamatanId: Umbulharjo.id,
+    },
   });
 
   const kalurahanList = [
-    Caturtunggal, Condongcatur, Maguwoharjo, Sinduadi, Sendangadi,
-    Minomartani, Sardonoharjo, Sidokarto, Ambarketawang, Tirtonirmolo,
-    Panggungharjo, Baciro, Sorosutan,
+    Caturtunggal,
+    Condongcatur,
+    Maguwoharjo,
+    Sinduadi,
+    Sendangadi,
+    Minomartani,
+    Sardonoharjo,
+    Sidokarto,
+    Ambarketawang,
+    Tirtonirmolo,
+    Panggungharjo,
+    Baciro,
+    Sorosutan,
   ];
 
-  const kecamatanList = [Depok, Mlati, Ngaglik, Godean, Gamping, Kasihan, Sewon, Gondokusuman, Umbulharjo];
+  const kecamatanList = [
+    Depok,
+    Mlati,
+    Ngaglik,
+    Godean,
+    Gamping,
+    Kasihan,
+    Sewon,
+    Gondokusuman,
+    Umbulharjo,
+  ];
   const kabupatenDomisiliList = [Sleman, Sleman, Sleman, Bantul, KotaYogya];
-  const kabupatenLahirList = [Sleman, Bantul, KotaYogya, Gunungkidul, KulonProgo, Magelang, Purworejo, Bandung, Malang];
+  const kabupatenLahirList = [
+    Sleman,
+    Bantul,
+    KotaYogya,
+    Gunungkidul,
+    KulonProgo,
+    Magelang,
+    Purworejo,
+    Bandung,
+    Malang,
+  ];
   const provinsiLahirList = [DIY, DIY, DIY, JawaTengah, JawaBarat, JawaTimur];
 
   console.log('Wilayah selesai\n');
@@ -625,11 +703,11 @@ async function main() {
 
   // NIP prefix per departemen
   const nipPrefix: Record<Departemen, string> = {
-    EXECUTIVE: 'EX',
-    HRD: 'HR',
-    MARKETING: 'MK',
-    PRODUCTION: 'PR',
-    COMMISSIONER: 'CM',
+    EXECUTIVE: '10',
+    HRD: '20',
+    MARKETING: '30',
+    PRODUCTION: '40',
+    COMMISSIONER: '50',
   };
 
   const nipCounters: Record<string, number> = {};
@@ -639,19 +717,22 @@ async function main() {
   const nonAktifNamas = ['Novan Andriyanto', 'Fina Rahmawati'];
 
   for (const def of pegawaiDefinitions) {
-    const prefix = def.nama === 'Super Administrator' ? 'SA' : nipPrefix[def.departemen];
+    const prefix =
+      def.nama === 'Super Administrator' ? '00' : nipPrefix[def.departemen];
     nipCounters[prefix] = (nipCounters[prefix] || 0) + 1;
     const nip = def.nama === 'Super Administrator'
-      ? 'SA00000001'
+      ? '00000001'
       : generateNIP(prefix, nipCounters[prefix]);
 
-    const emailPart = def.nama.toLowerCase()
+    const emailPart = def.nama
+      .toLowerCase()
       .replace(/\s+/g, '.')
       .replace(/[^a-z.]/g, '');
 
-    const email = def.nama === 'Super Administrator'
-      ? 'superadmin@pegawai.app'
-      : `${emailPart}@pegawai.app`;
+    const email =
+      def.nama === 'Super Administrator'
+        ? 'superadmin@pegawai.app'
+        : `${emailPart}@pegawai.app`;
 
     const domisili = randomElement(domisiliData);
     const kal = randomElement(kalurahanList);
@@ -664,9 +745,110 @@ async function main() {
       : StatusAktif.ACTIVE;
 
     const pendidikanData = [
-      { jenjang: 'S1', jurusan: 'Teknik Informatika', universitas: 'UGM', tahunLulus: 2015 },
-      { jenjang: 'D3', jurusan: 'Akuntansi', universitas: 'UPN Veteran Yogyakarta', tahunLulus: 2016 },
-      { jenjang: 'S2', jurusan: 'Manajemen', universitas: 'UII', tahunLulus: 2012 },
+      [
+        {
+          jenjang: 'SD',
+          jurusan: '-',
+          institusi: 'SD N 1 Yogyakarta',
+          tahunLulus: 2001,
+        },
+        {
+          jenjang: 'SMP',
+          jurusan: '-',
+          institusi: 'SMP N 1 Yogyakarta',
+          tahunLulus: 2004,
+        },
+        {
+          jenjang: 'SMA/SMK',
+          jurusan: 'IPA',
+          institusi: 'SMA N 1 Yogyakarta',
+          tahunLulus: 2007,
+        },
+        {
+          jenjang: 'S1',
+          jurusan: 'Teknik Informatika',
+          institusi: 'Universitas Gadjah Mada',
+          tahunLulus: 2011,
+        },
+      ],
+      [
+        {
+          jenjang: 'SD',
+          jurusan: '-',
+          institusi: 'SD N 2 Sleman',
+          tahunLulus: 2003,
+        },
+        {
+          jenjang: 'SMP',
+          jurusan: '-',
+          institusi: 'SMP N 2 Sleman',
+          tahunLulus: 2006,
+        },
+        {
+          jenjang: 'SMA/SMK',
+          jurusan: 'Akuntansi',
+          institusi: 'SMK N 1 Yogyakarta',
+          tahunLulus: 2009,
+        },
+        {
+          jenjang: 'D3',
+          jurusan: 'Akuntansi',
+          institusi: 'UPN Veteran Yogyakarta',
+          tahunLulus: 2012,
+        },
+      ],
+      [
+        {
+          jenjang: 'SD',
+          jurusan: '-',
+          institusi: 'SD N 3 Bantul',
+          tahunLulus: 2000,
+        },
+        {
+          jenjang: 'SMP',
+          jurusan: '-',
+          institusi: 'SMP N 3 Bantul',
+          tahunLulus: 2003,
+        },
+        {
+          jenjang: 'SMA/SMK',
+          jurusan: 'IPS',
+          institusi: 'SMA N 2 Bantul',
+          tahunLulus: 2006,
+        },
+        {
+          jenjang: 'S1',
+          jurusan: 'Manajemen',
+          institusi: 'Universitas Islam Indonesia',
+          tahunLulus: 2010,
+        },
+        {
+          jenjang: 'S2',
+          jurusan: 'Manajemen',
+          institusi: 'Universitas Islam Indonesia',
+          tahunLulus: 2013,
+        },
+      ],
+      [
+        {
+          jenjang: 'SD',
+          jurusan: '-',
+          institusi: 'SD N 4 Depok',
+          tahunLulus: 2004,
+        },
+        {
+          jenjang: 'SMP',
+          jurusan: '-',
+          institusi: 'SMP N 4 Depok',
+          tahunLulus: 2007,
+        },
+        {
+          jenjang: 'SMA/SMK',
+          jurusan: 'SIJA',
+          institusi: 'SMK N 2 Yogyakarta',
+          tahunLulus: 2010,
+        },
+      ],
     ];
 
     const pegawai = await prisma.pegawai.upsert({
@@ -686,10 +868,18 @@ async function main() {
         departemen: def.departemen,
         jenisPegawai: def.jenisPegawai,
         statusAktif,
-        provinsiId: def.nama === 'Super Administrator' ? DIY.id : (kabDomisili.provinsiId ?? DIY.id),
-        kabupatenId: def.nama === 'Super Administrator' ? Sleman.id : kabDomisili.id,
-        kecamatanId: def.nama === 'Super Administrator' ? Depok.id : randomElement(kecamatanList).id,
-        kalurahanId: def.nama === 'Super Administrator' ? Caturtunggal.id : kal.id,
+        provinsiId:
+          def.nama === 'Super Administrator'
+            ? DIY.id
+            : (kabDomisili.provinsiId ?? DIY.id),
+        kabupatenId:
+          def.nama === 'Super Administrator' ? Sleman.id : kabDomisili.id,
+        kecamatanId:
+          def.nama === 'Super Administrator'
+            ? Depok.id
+            : randomElement(kecamatanList).id,
+        kalurahanId:
+          def.nama === 'Super Administrator' ? Caturtunggal.id : kal.id,
         alamatDetail: `Jl. ${randomElement(['Mawar', 'Melati', 'Kenanga', 'Flamboyan', 'Nusa Indah'])} No.${randomInt(1, 99)}, RT ${randomInt(1, 10)} RW ${randomInt(1, 5)}`,
         latitude: def.nama === 'Super Administrator' ? -7.7659 : domisili.lat,
         longitude: def.nama === 'Super Administrator' ? 110.3786 : domisili.lon,
@@ -747,7 +937,9 @@ async function main() {
     }
   }
 
-  console.log(`Kuota absensi selesai (${allPegawai.length * tahunList.length} records)\n`);
+  console.log(
+    `Kuota absensi selesai (${allPegawai.length * tahunList.length} records)\n`
+  );
 
   console.log('Seeding presensi...');
 
@@ -756,7 +948,11 @@ async function main() {
     select: { id: true, nama: true },
   });
 
-  const lokasi = [LokasiGedung.GEDUNG_UTAMA, LokasiGedung.GEDUNG_A, LokasiGedung.GEDUNG_B];
+  const lokasi = [
+    LokasiGedung.GEDUNG_UTAMA,
+    LokasiGedung.GEDUNG_A,
+    LokasiGedung.GEDUNG_B,
+  ];
   let presensiCount = 0;
 
   for (const pg of pegawaiAktif) {
@@ -790,23 +986,47 @@ async function main() {
         const checkoutHour = randomInt(16, 18);
         const checkoutMinute = randomInt(0, 59);
         waktuCheckout = checkinTime(tanggal, checkoutHour, checkoutMinute);
-        durasi = Math.round((waktuCheckout.getTime() - waktuCheckin.getTime()) / 60000);
+        durasi = Math.round(
+          (waktuCheckout.getTime() - waktuCheckin.getTime()) / 60000
+        );
         statusTerpenuhi = durasi >= 480;
         isHalfday = durasi >= 240 && durasi < 480;
         statusVerifikasi = StatusVerifikasi.DISETUJUI;
       } else if (rand < 0.86) {
         statusKehadiran = StatusKehadiran.CUTI;
-        statusVerifikasi = randomElement([StatusVerifikasi.DISETUJUI, StatusVerifikasi.DISETUJUI, StatusVerifikasi.PENDING]);
+        statusVerifikasi = randomElement([
+          StatusVerifikasi.DISETUJUI,
+          StatusVerifikasi.DISETUJUI,
+          StatusVerifikasi.PENDING,
+        ]);
         verifikator = randomElement([Verifikator.MANAGER, Verifikator.HRD]);
-        keterangan = randomElement(['Cuti tahunan', 'Cuti keluarga', 'Cuti menikah', 'Cuti melahirkan', null]);
+        keterangan = randomElement([
+          'Cuti tahunan',
+          'Cuti keluarga',
+          'Cuti menikah',
+          'Cuti melahirkan',
+          null,
+        ]);
       } else if (rand < 0.91) {
         statusKehadiran = StatusKehadiran.IZIN;
-        statusVerifikasi = randomElement([StatusVerifikasi.DISETUJUI, StatusVerifikasi.PENDING]);
+        statusVerifikasi = randomElement([
+          StatusVerifikasi.DISETUJUI,
+          StatusVerifikasi.PENDING,
+        ]);
         verifikator = randomElement([Verifikator.LEAD, Verifikator.MANAGER]);
-        keterangan = randomElement(['Keperluan keluarga', 'Sakit ringan', 'Urusan pribadi', 'Keperluan administrasi']);
+        keterangan = randomElement([
+          'Keperluan keluarga',
+          'Sakit ringan',
+          'Urusan pribadi',
+          'Keperluan administrasi',
+        ]);
       } else if (rand < 0.93) {
         statusKehadiran = StatusKehadiran.UNPAID_LEAVE;
-        statusVerifikasi = randomElement([StatusVerifikasi.DISETUJUI, StatusVerifikasi.DITOLAK, StatusVerifikasi.PENDING]);
+        statusVerifikasi = randomElement([
+          StatusVerifikasi.DISETUJUI,
+          StatusVerifikasi.DITOLAK,
+          StatusVerifikasi.PENDING,
+        ]);
         verifikator = Verifikator.HRD;
         keterangan = 'Unpaid leave atas permintaan sendiri';
       } else {
@@ -817,7 +1037,9 @@ async function main() {
 
       try {
         await prisma.presensi.upsert({
-          where: { pegawaiId_tanggal: { pegawaiId: pg.id, tanggal: dateOnly(tanggal) } },
+          where: {
+            pegawaiId_tanggal: { pegawaiId: pg.id, tanggal: dateOnly(tanggal) },
+          },
           update: {},
           create: {
             pegawaiId: pg.id,
@@ -837,8 +1059,7 @@ async function main() {
           },
         });
         presensiCount++;
-      } catch {
-      }
+      } catch {}
     }
   }
 
@@ -851,13 +1072,19 @@ async function main() {
 
   for (const pg of pegawaiAktif) {
     for (let m = 11; m >= 0; m--) {
-      const periodeDate = new Date(today.getFullYear(), today.getMonth() - m, 1);
+      const periodeDate = new Date(
+        today.getFullYear(),
+        today.getMonth() - m,
+        1
+      );
       const periode = `${periodeDate.getFullYear()}-${String(periodeDate.getMonth() + 1).padStart(2, '0')}`;
 
       const jarakKm = parseFloat((randomInt(2, 25) + Math.random()).toFixed(2));
       const jumlahHariMasuk = randomInt(18, 22);
       const baseFare = 2500;
-      const totalTunjangan = parseFloat((jarakKm * 2 * jumlahHariMasuk * baseFare).toFixed(2));
+      const totalTunjangan = parseFloat(
+        (jarakKm * 2 * jumlahHariMasuk * baseFare).toFixed(2)
+      );
 
       try {
         await prisma.tunjangan.upsert({
