@@ -214,8 +214,8 @@ export class PegawaiController {
       if (pegawai.user?.role === Role.SUPERADMIN) {
         return ResponseHelper.error(
           c,
+          'Tidak dapat menghapus pegawai superadmin.',
           'Forbidden',
-          'Tidak dapat menghapus pegawai superadmin',
           403
         );
       }
@@ -223,7 +223,7 @@ export class PegawaiController {
       if (pegawai.user) {
         return ResponseHelper.error(
           c,
-          'Pegawai memiliki akun user aktif. Hapus user terlebih dahulu.',
+          'Tidak dapat menghapus pegawai yang memiliki akun user aktif.',
           null,
           422
         );

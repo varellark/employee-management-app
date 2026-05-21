@@ -136,7 +136,6 @@ export default function PegawaiPage() {
   const handleDelete = async (ids: number[]) => {
     try {
       setLoading(true);
-      console.log('isi', ids)
       let response;
       if (ids.length === 1) {
         response = await Request.DELETE(`/pegawai/${ids[0]}`);

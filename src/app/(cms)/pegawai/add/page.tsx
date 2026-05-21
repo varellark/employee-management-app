@@ -1,10 +1,9 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useForm, useFieldArray } from 'react-hook-form';
-import { FiUsers, FiPlus, FiTrash2, FiUpload } from 'react-icons/fi';
+import { FiUsers, FiPlus, FiTrash2 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import Card from '@/components/ui/card';
 import Request from '@/utils/request';
@@ -19,7 +18,6 @@ type PendidikanItem = {
 };
 
 type FormValues = {
-  foto: FileList;
   nip: string;
   nama: string;
   email: string;
@@ -148,8 +146,6 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 export default function AddPegawaiPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [fotoPreview, setFotoPreview] = useState<string | null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
   const [kalurahanList, setKalurahanList] = useState<Wilayah[]>([]);
   const [, setKabupatenNama] = useState('');
   const [provinsiNama, setProvinsiNama] = useState('');
@@ -181,6 +177,11 @@ export default function AddPegawaiPage() {
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const tanggalLahir = watch('tanggalLahir');
+
+  const formatDate = (dateString: string) => {
+    const [year, month, day] = dateString.split('-');
+    return `${day}/${month}/${year}`;
+  };
 
   useEffect(() => {
     if (!tanggalLahir) {
@@ -293,27 +294,6 @@ export default function AddPegawaiPage() {
     return () => clearTimeout(timer);
   }, [tempatLahirKeyword, selectedTempatLahir]);
 
-  const handleFotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!['image/png', 'image/jpeg', 'image/jpg'].includes(file.type)) {
-      toast.error('Format foto harus PNG, JPEG, atau JPG');
-      e.target.value = '';
-      return;
-    }
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error('Ukuran foto maksimal 2MB');
-      e.target.value = '';
-      return;
-    }
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    setValue('foto', file);
-    const reader = new FileReader();
-    reader.onload = () => setFotoPreview(reader.result as string);
-    reader.readAsDataURL(file);
-  };
-
   const onSubmit = async (data: FormValues) => {
     if (!selectedTempatLahir) {
       toast.error('Silakan pilih tempat lahir');
@@ -335,11 +315,11 @@ export default function AddPegawaiPage() {
         latitude: data.latitude ? parseFloat(data.latitude) : undefined,
         longitude: data.longitude ? parseFloat(data.longitude) : undefined,
         tempatLahirKabupatenId: selectedTempatLahir.id,
-        tanggalLahir: data.tanggalLahir,
+        tanggalLahir: formatDate(data.tanggalLahir),
         gender: data.gender,
         statusKawin: data.statusKawin,
         jumlahAnak: Number(data.jumlahAnak),
-        tanggalMasuk: data.tanggalMasuk,
+        tanggalMasuk: formatDate(data.tanggalMasuk),
         jabatan: data.jabatan,
         departemen: data.departemen,
         jenisPegawai: data.jenisPegawai,
@@ -376,49 +356,7 @@ export default function AddPegawaiPage() {
         description='Tambahkan data pegawai baru ke dalam sistem.'
         icon={<FiUsers size={32} />}
       />
-
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <section className='mb-5'>
-          <SectionTitle>Foto Pegawai</SectionTitle>
-          <div className='d-flex align-items-center gap-4'>
-            <div
-              className='rounded-circle overflow-hidden border d-flex align-items-center justify-content-center bg-light flex-shrink-0'
-              style={{ width: 90, height: 90 }}
-            >
-              {fotoPreview ? (
-                <Image
-                  src={fotoPreview}
-                  alt='Preview'
-                  width={90}
-                  height={90}
-                  style={{ objectFit: 'cover', width: '100%', height: '100%' }}
-                />
-              ) : (
-                <span style={{ fontSize: 36 }}>👤</span>
-              )}
-            </div>
-            <div>
-              <input
-                type='file'
-                accept='image/png,image/jpeg,image/jpg'
-                className='d-none'
-                ref={fileRef}
-                onChange={handleFotoChange}
-              />
-              <button
-                type='button'
-                onClick={() => fileRef.current?.click()}
-                className='btn btn-outline-primary rounded-3 d-flex align-items-center gap-2'
-              >
-                <FiUpload size={14} />
-                Upload Foto
-              </button>
-              <small className='text-secondary d-block mt-2'>
-                Format: PNG, JPEG, JPG. Maks 2MB.
-              </small>
-            </div>
-          </div>
-        </section>
         <section className='mb-5'>
           <SectionTitle>Data Pribadi</SectionTitle>
           <div className='row g-3'>
@@ -426,16 +364,25 @@ export default function AddPegawaiPage() {
               <label className='form-label fw-semibold small'>NIP</label>
               <input
                 type='text'
+                inputMode='numeric'
                 className={inputCls(errors.nip)}
                 placeholder='Minimal 8 digit angka'
+                maxLength={20}
                 {...register('nip', {
                   required: 'NIP wajib diisi',
-                  minLength: { value: 8, message: 'Minimal 8 karakter' },
+                  minLength: {
+                    value: 8,
+                    message: 'Minimal 8 digit',
+                  },
                   pattern: {
                     value: /^\d+$/,
                     message: 'Hanya boleh angka, tanpa spasi',
                   },
                 })}
+                onInput={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  target.value = target.value.replace(/\D/g, '');
+                }}
               />
               {errors.nip && (
                 <div className='invalid-feedback'>{errors.nip.message}</div>
@@ -483,8 +430,10 @@ export default function AddPegawaiPage() {
               <label className='form-label fw-semibold small'>Nomor HP</label>
               <input
                 type='text'
+                inputMode='numeric'
                 className={inputCls(errors.nomorHp)}
                 placeholder='+6282218458888'
+                maxLength={16}
                 {...register('nomorHp', {
                   required: 'Nomor HP wajib diisi',
                   pattern: {
@@ -492,6 +441,19 @@ export default function AddPegawaiPage() {
                     message: 'Format internasional, contoh: +6282218458888',
                   },
                 })}
+                onInput={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  let value = target.value;
+                  value = value.replace(/[^\d+]/g, '');
+                  if (value.includes('+')) {
+                    value =
+                      '+' + value.replace(/\+/g, '').replace(/[^\d]/g, '');
+                  }
+                  if (value && !value.startsWith('+')) {
+                    value = '+' + value.replace(/[^\d]/g, '');
+                  }
+                  target.value = value;
+                }}
               />
               {errors.nomorHp && (
                 <div className='invalid-feedback'>{errors.nomorHp.message}</div>
@@ -563,14 +525,26 @@ export default function AddPegawaiPage() {
                 Jumlah Anak
               </label>
               <input
-                type='number'
+                type='text'
+                inputMode='numeric'
+                maxLength={2}
                 className={inputCls(errors.jumlahAnak)}
-                min={0}
-                max={99}
+                placeholder='0'
                 {...register('jumlahAnak', {
-                  min: { value: 0, message: 'Minimal 0' },
-                  max: { value: 99, message: 'Maksimal 99' },
+                  required: 'Jumlah anak wajib diisi',
+                  pattern: {
+                    value: /^(0|[1-9][0-9]?)$/,
+                    message: 'Hanya angka 0 - 99',
+                  },
+                  validate: (value) => Number(value) <= 99 || 'Maksimal 99',
                 })}
+                onInput={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  target.value = target.value.replace(/\D/g, '');
+                  if (target.value.length > 2) {
+                    target.value = target.value.slice(0, 2);
+                  }
+                }}
               />
               {errors.jumlahAnak && (
                 <div className='invalid-feedback'>
