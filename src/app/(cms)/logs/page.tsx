@@ -327,24 +327,6 @@ export default function LogPage() {
           >
             <FiFilter size={16} />
             Filter
-            {Object.values(filters).some((v) =>
-              Array.isArray(v) ? v.length > 0 : !!v
-            ) && (
-              <span
-                className='badge rounded-pill'
-                style={{ background: '#0d2a94', fontSize: '10px' }}
-              >
-                {
-                  [
-                    ...filters.username,
-                    ...filters.modul,
-                    filters.aksi,
-                    filters.startDate,
-                    filters.endDate,
-                  ].filter(Boolean).length
-                }
-              </span>
-            )}
           </button>
         </div>
         <Table

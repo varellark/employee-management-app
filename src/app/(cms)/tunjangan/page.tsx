@@ -17,6 +17,8 @@ import Request from '@/utils/request';
 import { dateFormat } from '@/utils/date';
 import { formatRupiah } from '@/utils/format';
 import SearchBar from '@/components/ui/searchBar';
+import { UserLogin } from '@/types/auth';
+import useAuthStore from '@/store/authStore';
 
 type Tunjangan = {
   id: number;
@@ -37,6 +39,8 @@ type Tunjangan = {
 };
 
 export default function TunjanganPage() {
+  const user: UserLogin | null = useAuthStore((state) => state.user);
+  const role = user?.role;
   const [tunjangan, setTunjangan] = useState<Tunjangan[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
@@ -193,16 +197,18 @@ export default function TunjanganPage() {
           title='Tunjangan Transport'
           description='Kelola data tunjangan transport pegawai.'
         />
-        <div className='alert alert-light border rounded-4 mb-4'>
-          <div className='fw-semibold mb-2'>Aturan Tunjangan Transport</div>
-          <ul className='mb-0 small text-secondary ps-3'>
-            <li>Rumus: Base Fare × KM × Jumlah Hari Masuk</li>
-            <li>Minimal hari kerja: 19 hari</li>
-            <li>Jarak minimal: lebih dari 5 KM</li>
-            <li>Jarak maksimal dihitung: 25 KM</li>
-            <li>Hanya berlaku untuk pegawai tetap</li>
-          </ul>
-        </div>
+        {role === 'ADMIN_HRD' && (
+          <div className='alert alert-light border rounded-4 mb-4'>
+            <div className='fw-semibold mb-2'>Aturan Tunjangan Transport</div>
+            <ul className='mb-0 small text-secondary ps-3'>
+              <li>Rumus: Base Fare × KM × Jumlah Hari Masuk</li>
+              <li>Minimal hari kerja: 19 hari</li>
+              <li>Jarak minimal: lebih dari 5 KM</li>
+              <li>Jarak maksimal dihitung: 25 KM</li>
+              <li>Hanya berlaku untuk pegawai tetap</li>
+            </ul>
+          </div>
+        )}
         <div className='d-flex flex-column flex-lg-row justify-content-between align-items-stretch align-items-lg-center gap-3 mb-4'>
           <div className='flex-grow-1'>
             <SearchBar

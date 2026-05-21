@@ -279,7 +279,7 @@ export default function PegawaiPage() {
               setSearch(e.target.value)
             }
             onSubmit={handleSearch}
-            placeholder='Cari nama, NIP, atau jabatan...'
+            placeholder='Cari nama atau NIP...'
           />
           <button
             type='button'
@@ -288,11 +288,6 @@ export default function PegawaiPage() {
           >
             <FiFilter size={16} />
             Filter
-            {Object.values(filters).filter(Boolean).length > 0 && (
-              <span className='badge bg-primary rounded-pill ms-1'>
-                {Object.values(filters).filter(Boolean).length}
-              </span>
-            )}
           </button>
         </div>
         <div className='table-responsive border rounded-4 shadow-sm bg-white'>
