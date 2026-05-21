@@ -10,6 +10,7 @@ import useAuthStore from '@/store/authStore';
 import type { UserLogin } from '@/types/auth';
 import { toast } from 'react-toastify';
 import Link from 'next/link';
+import Request from '@/utils/request';
 
 interface NavbarProps {
   toggleSidebarAction?: () => void;
@@ -44,9 +45,12 @@ export default function Navbar({ toggleSidebarAction, user }: NavbarProps) {
   const handleLogoutClick = async () => {
     setLoading(true);
     try {
+      await Request.POST('/auth/logout', {});
       logout();
+      toast.success('Berhasil logout');
       router.push('/login');
-    } catch {
+    } catch (error) {
+      console.error(error);
       toast.error('Gagal logout');
     } finally {
       setLoading(false);

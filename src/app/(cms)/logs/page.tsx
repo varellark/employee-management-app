@@ -35,10 +35,14 @@ interface UserItem {
 }
 
 const MODUL_OPTIONS = [
+  { value: 'AUTH LOGIN', label: 'Auth Login' },
+  { value: 'AUTH LOGOUT', label: 'Auth Logout' },
   { value: 'USER', label: 'User' },
+  { value: 'DASHBOARD', label: 'Dashboard' },
   { value: 'PEGAWAI', label: 'Pegawai' },
-  { value: 'AUTH', label: 'Auth' },
-  { value: 'LOG', label: 'Log' },
+  { value: 'PRESENSI', label: 'Presensi' },
+  { value: 'TUNJANGAN', label: 'Tunjangan' },
+  { value: 'SETTING_TUNJANGAN', label: 'Pengaturan Tunjangan' },
 ];
 
 const AKSI_OPTIONS = [
