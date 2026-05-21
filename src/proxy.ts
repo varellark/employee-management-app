@@ -18,12 +18,17 @@ const roleAccessMap: Record<string, string[]> = {
   ],
 };
 
+const blockedSubPaths: Record<string, string[]> = {
+  MANAGER_HRD: [
+    '/pegawai/add',
+    '/pegawai/edit',
+  ],
+};
+
 async function verifyToken(token: string) {
   try {
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-
     const { payload } = await jwtVerify(token, secret);
-
     return payload;
   } catch {
     return null;
@@ -32,9 +37,7 @@ async function verifyToken(token: string) {
 
 export async function proxy(req: NextRequest) {
   const token = req.cookies.get('auth_token')?.value;
-
   const { pathname } = req.nextUrl;
-
   const cleanPath = pathname.toLowerCase().replace(/\/$/, '') || '/';
 
   if (
@@ -62,16 +65,23 @@ export async function proxy(req: NextRequest) {
 
     if (!payload) {
       const response = NextResponse.redirect(new URL('/login', req.url));
-
       response.cookies.delete('auth_token');
-
       return response;
     }
 
     const role = String(payload.role).toUpperCase();
 
-    const allowedPaths = roleAccessMap[role] ?? [];
+    const blocked = blockedSubPaths[role] ?? [];
+    const isBlocked = blocked.some(
+      (blockedPath) =>
+        cleanPath === blockedPath || cleanPath.startsWith(`${blockedPath}/`)
+    );
 
+    if (isBlocked) {
+      return NextResponse.redirect(new URL('/unauthorized', req.url));
+    }
+
+    const allowedPaths = roleAccessMap[role] ?? [];
     const isAllowed = allowedPaths.some(
       (basePath) =>
         cleanPath === basePath || cleanPath.startsWith(`${basePath}/`)
