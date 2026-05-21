@@ -161,8 +161,46 @@ export default function PegawaiPage() {
     try {
       const query = new URLSearchParams({ search });
       if (filters.status) query.append('status', filters.status);
-      const res = await Request.GET(`/pegawai/export?${query.toString()}`);
-      if (res.success) toast.info('Fitur export PDF dalam pengembangan.');
+      if (filters.jabatan) query.append('jabatan', filters.jabatan);
+      if (filters.jenisPegawai) query.append('jenisPegawai', filters.jenisPegawai);
+      if (filters.masaKerjaOperator) query.append('masaKerjaOperator', filters.masaKerjaOperator);
+      if (filters.masaKerjaTahun) query.append('masaKerjaTahun', filters.masaKerjaTahun);
+
+      toast.info('Sedang menyiapkan PDF...');
+
+      const token = useAuthStore.getState().token;
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_FETCH_URL}/pegawai/export?${query.toString()}`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        toast.error(err?.message || 'Gagal export PDF');
+        return;
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+
+      const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      const filename = `daftar-pegawai-${timestamp}.pdf`;
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+
+      toast.success('PDF berhasil diunduh!');
     } catch {
       toast.error('Gagal export data');
     }

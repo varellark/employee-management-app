@@ -18,8 +18,8 @@ export class PresensiController {
       if (auth.role === Role.SUPERADMIN) {
         return ResponseHelper.error(
           c,
-          'Forbidden',
           'Anda tidak memiliki akses',
+          'Forbidden',
           403
         );
       }
@@ -53,8 +53,8 @@ export class PresensiController {
       if (auth.role === Role.SUPERADMIN) {
         return ResponseHelper.error(
           c,
-          'Forbidden',
           'Anda tidak memiliki akses',
+          'Forbidden',
           403
         );
       }
@@ -95,8 +95,8 @@ export class PresensiController {
       if (auth.role !== Role.ADMIN_HRD) {
         return ResponseHelper.error(
           c,
-          'Forbidden',
           'Anda tidak memiliki akses',
+          'Forbidden',
           403
         );
       }
@@ -150,8 +150,8 @@ export class PresensiController {
       if (auth.role !== Role.ADMIN_HRD) {
         return ResponseHelper.error(
           c,
-          'Forbidden',
           'Anda tidak memiliki akses',
+          'Forbidden',
           403
         );
       }
@@ -198,8 +198,8 @@ export class PresensiController {
       if (auth.role !== Role.ADMIN_HRD) {
         return ResponseHelper.error(
           c,
-          'Forbidden',
           'Anda tidak memiliki akses',
+          'Forbidden',
           403
         );
       }

@@ -11,6 +11,9 @@ import {
 import { LogService } from '../../services/log.service';
 import type { AuthPayload } from '../../middlewares/auth.middleware';
 import { formatMasaKerja } from '../../helpers/masaKerja';
+import { buildPegawaiListHtml } from '@/server/templates/pegawaiListTemplate';
+import { generatePdfFromHtml } from '@/server/helpers/pdfGenerator';
+import type { PegawaiRow } from '@/server/templates/pegawaiListTemplate';
 
 export class PegawaiController {
   static async index(c: Context) {
@@ -257,8 +260,8 @@ export class PegawaiController {
       if (!Array.isArray(ids) || ids.length === 0) {
         return ResponseHelper.error(
           c,
-          'IDs tidak valid',
           'ids harus berupa array tidak kosong',
+          'IDs tidak valid',
           422
         );
       }
@@ -267,8 +270,8 @@ export class PegawaiController {
       if (invalidIds.length > 0) {
         return ResponseHelper.error(
           c,
-          'IDs tidak valid',
           `ID berikut tidak valid: ${invalidIds.join(', ')}`,
+          'IDs tidak valid',
           422
         );
       }
@@ -280,8 +283,8 @@ export class PegawaiController {
       if (withUser.length > 0) {
         return ResponseHelper.error(
           c,
-          'Beberapa pegawai memiliki akun user aktif',
           `Hapus user terlebih dahulu untuk: ${withUser.map((p) => p.nama).join(', ')}`,
+          'Beberapa pegawai memiliki akun user aktif',
           422
         );
       }
@@ -292,8 +295,8 @@ export class PegawaiController {
       if (superadminPegawai.length > 0) {
         return ResponseHelper.error(
           c,
-          'Forbidden',
           `Tidak dapat menghapus pegawai superadmin: ${superadminPegawai.map((p) => p.nama).join(', ')}`,
+          'Forbidden',
           403
         );
       }
@@ -385,24 +388,34 @@ export class PegawaiController {
         noPagination: 'true',
       });
 
+      const html = buildPegawaiListHtml(result.data as PegawaiRow[]);
+      const pdfBuffer = await generatePdfFromHtml(html);
+
+      const timestamp = new Date()
+        .toISOString()
+        .slice(0, 10)
+        .replace(/-/g, '');
+      const filename = `daftar-pegawai-${timestamp}.pdf`;
+
       await LogService.create({
         userId: auth.id,
         username: auth.username,
         aksi: AksiLog.READ,
         modul: 'PEGAWAI',
-        keterangan: 'Export data daftar pegawai',
+        keterangan: 'Export PDF daftar pegawai',
         ipAddress: c.req.header('x-forwarded-for') || '',
         userAgent: c.req.header('user-agent') || '',
       });
 
-      return ResponseHelper.success(
-        c,
-        'Data export pegawai berhasil diambil',
-        result.data
-      );
+      c.header('Content-Type', 'application/pdf');
+      c.header('Content-Disposition', `attachment; filename="${filename}"`);
+      c.header('Content-Length', String(pdfBuffer.length));
+
+      return c.body(pdfBuffer.buffer as ArrayBuffer);
     } catch (error) {
-      console.error(error);
-      return ResponseHelper.error(c, 'Internal server error', error);
+      const message = error instanceof Error ? error.message : String(error);
+      console.error('Export PDF error:', error);
+      return ResponseHelper.error(c, message, null, 500); // ← tampilkan message asli
     }
   }
 

@@ -15,7 +15,7 @@ export const roleMiddleware = (...roles: Role[]) => {
     const hasAccess = roles.includes(user.role as Role);
 
     if (!hasAccess) {
-      return ResponseHelper.error(c, 'Forbidden', 'Access denied', 403);
+      return ResponseHelper.error(c, 'Access denied', 'Forbidden', 403);
     }
 
     await next();

@@ -89,8 +89,8 @@ export class UserController {
       if (auth.role !== Role.SUPERADMIN) {
         return ResponseHelper.error(
           c,
-          'Forbidden',
           'Anda tidak memiliki akses',
+          'Forbidden',
           403
         );
       }
@@ -203,8 +203,8 @@ export class UserController {
       if (auth.role !== Role.SUPERADMIN && auth.id !== existingUser.id) {
         return ResponseHelper.error(
           c,
-          'Forbidden',
           'Anda tidak memiliki akses',
+          'Forbidden',
           403
         );
       }
@@ -251,8 +251,8 @@ export class UserController {
       if (auth.role !== Role.SUPERADMIN) {
         return ResponseHelper.error(
           c,
-          'Forbidden',
           'Anda tidak memiliki akses',
+          'Forbidden',
           403
         );
       }
@@ -268,8 +268,8 @@ export class UserController {
       if (auth.id === user.id) {
         return ResponseHelper.error(
           c,
-          'Forbidden',
           'Tidak dapat menghapus akun sendiri',
+          'Forbidden',
           403
         );
       }
@@ -301,8 +301,8 @@ export class UserController {
       if (auth.role !== Role.SUPERADMIN) {
         return ResponseHelper.error(
           c,
-          'Forbidden',
           'Anda tidak memiliki akses',
+          'Forbidden',
           403
         );
       }
@@ -318,8 +318,8 @@ export class UserController {
       if (auth.id === user.id) {
         return ResponseHelper.error(
           c,
-          'Forbidden',
           'Tidak dapat mengubah status akun sendiri',
+          'Forbidden',
           403
         );
       }
