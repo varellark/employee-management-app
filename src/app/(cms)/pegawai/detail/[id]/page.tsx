@@ -166,8 +166,48 @@ export default function DetailPegawaiPage() {
     if (id) fetchDetail();
   }, [id, router]);
 
-  const handleExport = () => {
-    toast.info('Fitur export PDF dalam pengembangan.');
+  const handleExport = async (id: number) => {
+    try {
+      setLoading(true);
+      toast.info('Sedang menyiapkan PDF...');
+      const token = useAuthStore.getState().token;
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_FETCH_URL}/pegawai/${id}/export`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        toast.error(err?.message || 'Gagal export PDF');
+        return;
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+
+      const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      const filename = `pegawai-${id}-${timestamp}.pdf`;
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+
+      toast.success('PDF berhasil diunduh!');
+    } catch {
+      toast.error('Gagal export data');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading) {
@@ -215,7 +255,7 @@ export default function DetailPegawaiPage() {
           )}
           <button
             type='button'
-            onClick={handleExport}
+            onClick={() => handleExport(data.id)}
             className='btn fw-semibold d-inline-flex align-items-center justify-content-center gap-2 px-4 py-2 rounded-4 shadow-sm'
             style={{
               background: 'linear-gradient(135deg, #475569 0%, #64748b 100%)',

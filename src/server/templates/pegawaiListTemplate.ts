@@ -1,4 +1,3 @@
-// Tipe minimal yang dibutuhkan template, sesuaikan dengan tipe Pegawai kamu
 export interface PegawaiRow {
   nip: string;
   nama: string;
@@ -101,7 +100,6 @@ export function buildPegawaiListHtml(
       background: #fff;
     }
 
-    /* ── Header ── */
     .header {
       display: flex;
       align-items: center;
@@ -131,7 +129,6 @@ export function buildPegawaiListHtml(
       color: #1e293b;
     }
 
-    /* ── Summary bar ── */
     .summary {
       display: flex;
       gap: 10px;
@@ -158,7 +155,6 @@ export function buildPegawaiListHtml(
       margin-top: 1px;
     }
 
-    /* ── Table ── */
     table {
       width: 100%;
       border-collapse: collapse;
@@ -194,7 +190,6 @@ export function buildPegawaiListHtml(
     .nama { font-weight: 600; color: #1e293b; }
     .sub  { font-size: 8.5px; color: #94a3b8; margin-top: 1px; }
 
-    /* ── Badges ── */
     .badge {
       display: inline-block;
       padding: 2px 7px;
@@ -208,7 +203,6 @@ export function buildPegawaiListHtml(
     .badge-aktif    { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
     .badge-nonaktif { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
 
-    /* ── Footer ── */
     .footer {
       margin-top: 14px;
       display: flex;
@@ -221,7 +215,6 @@ export function buildPegawaiListHtml(
     }
     .footer strong { color: #64748b; }
 
-    /* ── Empty state ── */
     .empty {
       text-align: center;
       padding: 30px;
@@ -232,7 +225,6 @@ export function buildPegawaiListHtml(
 </head>
 <body>
 
-  <!-- Header -->
   <div class="header">
     <div class="header-left">
       <h1>Daftar Pegawai</h1>
@@ -244,7 +236,6 @@ export function buildPegawaiListHtml(
     </div>
   </div>
 
-  <!-- Summary -->
   <div class="summary">
     <div class="summary-card">
       <div class="label">Total Pegawai</div>
@@ -272,7 +263,6 @@ export function buildPegawaiListHtml(
     </div>
   </div>
 
-  <!-- Table -->
   ${
     data.length === 0
       ? `<div class="empty">📭 Tidak ada data pegawai yang ditemukan.</div>`
@@ -297,7 +287,6 @@ export function buildPegawaiListHtml(
   </table>`
   }
 
-  <!-- Footer -->
   <div class="footer">
     <div>Dokumen ini digenerate secara otomatis oleh sistem.</div>
     <div>Dicetak pada: <strong>${tanggalCetak}</strong></div>

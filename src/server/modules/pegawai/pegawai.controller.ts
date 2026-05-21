@@ -10,10 +10,10 @@ import {
 } from './pegawai.validation';
 import { LogService } from '../../services/log.service';
 import type { AuthPayload } from '../../middlewares/auth.middleware';
-import { formatMasaKerja } from '../../helpers/masaKerja';
 import { buildPegawaiListHtml } from '@/server/templates/pegawaiListTemplate';
 import { generatePdfFromHtml } from '@/server/helpers/pdfGenerator';
 import type { PegawaiRow } from '@/server/templates/pegawaiListTemplate';
+import { buildPegawaiDetailHtml, PegawaiDetailRow } from '@/server/templates/pegawaiTemplate';
 
 export class PegawaiController {
   static async index(c: Context) {
@@ -434,23 +434,35 @@ export class PegawaiController {
         return ResponseHelper.error(c, 'Pegawai tidak ditemukan', null, 404);
       }
 
+      const html = buildPegawaiDetailHtml(pegawai as PegawaiDetailRow);
+      const pdfBuffer = await generatePdfFromHtml(html);
+
+      const timestamp = new Date()
+        .toISOString()
+        .slice(0, 10)
+        .replace(/-/g, '');
+      const safeName = pegawai.nama.replace(/\s+/g, '-').toLowerCase();
+      const filename = `pegawai-${safeName}-${timestamp}.pdf`;
+
       await LogService.create({
         userId: auth.id,
         username: auth.username,
         aksi: AksiLog.READ,
         modul: 'PEGAWAI',
-        keterangan: `Export data pegawai ${pegawai.nama}`,
+        keterangan: `Export PDF data pegawai ${pegawai.nama}`,
         ipAddress: c.req.header('x-forwarded-for') || '',
         userAgent: c.req.header('user-agent') || '',
       });
 
-      return ResponseHelper.success(c, 'Data export pegawai berhasil diambil', {
-        ...pegawai,
-        masaKerjaFormatted: formatMasaKerja(pegawai.masaKerja),
-      });
+      c.header('Content-Type', 'application/pdf');
+      c.header('Content-Disposition', `attachment; filename="${filename}"`);
+      c.header('Content-Length', String(pdfBuffer.length));
+
+      return c.body(pdfBuffer.buffer as ArrayBuffer);
     } catch (error) {
-      console.error(error);
-      return ResponseHelper.error(c, 'Internal server error', error);
+      const message = error instanceof Error ? error.message : String(error);
+      console.error('Export PDF error:', error);
+      return ResponseHelper.error(c, message, null, 500);
     }
   }
 }

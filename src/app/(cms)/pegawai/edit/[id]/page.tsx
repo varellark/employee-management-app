@@ -192,6 +192,8 @@ export default function EditPegawaiPage() {
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const tanggalLahir = watch('tanggalLahir');
+  const kecamatanId = watch('kecamatanId');
+  const kalurahanId = watch('kalurahanId');
 
   const formatDate = (dateString: string) => {
     const [year, month, day] = dateString.split('-');
@@ -296,12 +298,16 @@ export default function EditPegawaiPage() {
           );
           if (kecRes.success) {
             setKecamatanList(kecRes.data);
+            setValue('kecamatanId', p.kecamatanId ? String(p.kecamatanId) : '');
 
             if (p.kecamatanId) {
               const kelRes = await Request.GET(
                 `/wilayah/kalurahan?kecamatanId=${p.kecamatanId}`
               );
-              if (kelRes.success) setKalurahanList(kelRes.data);
+              if (kelRes.success) {
+                setKalurahanList(kelRes.data);
+                setValue('kalurahanId', p.kalurahanId ? String(p.kalurahanId) : '');
+              }
             }
           }
         }
@@ -786,10 +792,11 @@ export default function EditPegawaiPage() {
             </div>
             <div className='col-12 col-md-6'>
               <label className='form-label fw-semibold small'>Kecamatan</label>
+              <input type='hidden' {...register('kecamatanId')} />
               <select
                 className='form-select rounded-3'
                 disabled={kecamatanList.length === 0}
-                {...register('kecamatanId')}
+                value={kecamatanId}
                 onChange={(e) => handleKecamatanChange(e.target.value)}
               >
                 <option value=''>
@@ -808,10 +815,12 @@ export default function EditPegawaiPage() {
               <label className='form-label fw-semibold small'>
                 Kalurahan / Desa
               </label>
+              <input type='hidden' {...register('kalurahanId')} />
               <select
                 className='form-select rounded-3'
                 disabled={kalurahanList.length === 0}
-                {...register('kalurahanId')}
+                value={kalurahanId}
+                onChange={(e) => setValue('kalurahanId', e.target.value)}
               >
                 <option value=''>
                   {kalurahanList.length === 0

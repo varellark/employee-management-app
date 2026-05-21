@@ -42,6 +42,7 @@ export default function PegawaiPage() {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [sortBy, setSortBy] = useState<SortKey>('nama');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+  const [loadingDownloadAll, setLoadingDownloadAll] = useState(false);
 
   const [filters, setFilters] = useState<{
     status?: string;
@@ -159,12 +160,16 @@ export default function PegawaiPage() {
 
   const handleDownloadAll = async () => {
     try {
+      setLoadingDownloadAll(true);
       const query = new URLSearchParams({ search });
       if (filters.status) query.append('status', filters.status);
       if (filters.jabatan) query.append('jabatan', filters.jabatan);
-      if (filters.jenisPegawai) query.append('jenisPegawai', filters.jenisPegawai);
-      if (filters.masaKerjaOperator) query.append('masaKerjaOperator', filters.masaKerjaOperator);
-      if (filters.masaKerjaTahun) query.append('masaKerjaTahun', filters.masaKerjaTahun);
+      if (filters.jenisPegawai)
+        query.append('jenisPegawai', filters.jenisPegawai);
+      if (filters.masaKerjaOperator)
+        query.append('masaKerjaOperator', filters.masaKerjaOperator);
+      if (filters.masaKerjaTahun)
+        query.append('masaKerjaTahun', filters.masaKerjaTahun);
 
       toast.info('Sedang menyiapkan PDF...');
 
@@ -203,15 +208,52 @@ export default function PegawaiPage() {
       toast.success('PDF berhasil diunduh!');
     } catch {
       toast.error('Gagal export data');
+    } finally {
+      setLoadingDownloadAll(false);
     }
   };
 
   const handleDownloadOne = async (id: number) => {
     try {
-      const res = await Request.GET(`/pegawai/${id}/export`);
-      if (res.success) toast.info('Fitur export PDF dalam pengembangan.');
+      setLoading(true);
+      toast.info('Sedang menyiapkan PDF...');
+      const token = useAuthStore.getState().token;
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_FETCH_URL}/pegawai/${id}/export`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        toast.error(err?.message || 'Gagal export PDF');
+        return;
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+
+      const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      const filename = `pegawai-${id}-${timestamp}.pdf`;
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+
+      toast.success('PDF berhasil diunduh!');
     } catch {
       toast.error('Gagal export data');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -235,7 +277,8 @@ export default function PegawaiPage() {
     return `${tahun} thn ${bulan} bln`;
   };
 
-  const isAllSelected = pegawaiList.length > 0 && selectedIds.length === pegawaiList.length;
+  const isAllSelected =
+    pegawaiList.length > 0 && selectedIds.length === pegawaiList.length;
   const isSomeSelected = selectedIds.length > 0 && !isAllSelected;
 
   return (
@@ -270,7 +313,8 @@ export default function PegawaiPage() {
                 }
                 className='btn text-white fw-semibold d-inline-flex align-items-center justify-content-center gap-2 px-4 py-2 rounded-4 shadow-sm'
                 style={{
-                  background: 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)',
+                  background:
+                    'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)',
                   border: 'none',
                   transition: 'all 0.2s ease',
                 }}
@@ -289,8 +333,21 @@ export default function PegawaiPage() {
                 transition: 'all 0.2s ease',
               }}
             >
-              <FiDownload size={15} />
-              Export
+              {loadingDownloadAll ? (
+                <>
+                  <span
+                    className='spinner-border spinner-border-sm'
+                    role='status'
+                    aria-hidden='true'
+                  />
+                  Memproses...
+                </>
+              ) : (
+                <>
+                  <FiDownload size={15} />
+                  Export
+                </>
+              )}
             </button>
             {role === 'ADMIN_HRD' && (
               <Link
@@ -524,7 +581,9 @@ export default function PegawaiPage() {
                     </td>
                     <td className='px-4 py-3'>
                       {item.id === user?.pegawai?.id ? (
-                        <span className='text-secondary small fst-italic'>Akun sendiri</span>
+                        <span className='text-secondary small fst-italic'>
+                          Akun sendiri
+                        </span>
                       ) : (
                         <div className='d-flex align-items-center gap-1'>
                           <Link
